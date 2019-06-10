@@ -14,8 +14,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.deepPurple,
       ),
-      //home: NoteList(),
-      home: NoteDetail(),
+      home: NoteList(),
+      //home: NoteDetail(),
     );
   }
 }
