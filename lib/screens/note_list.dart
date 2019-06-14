@@ -5,18 +5,9 @@ import 'package:notekeeper/models/note.dart';
 import 'package:notekeeper/utils/database_helper.dart';
 import 'package:sqflite/sqflite.dart';
 
-class NoteList extends StatefulWidget{
-
-  @override
-  State<StatefulWidget> createState(){
-
-    return NoteListState();
-  }
-}
-
 class NoteListState extends State<NoteList>{
 
-   DatabaseHelper databaseHelper=DatabaseHelper();
+  DatabaseHelper databaseHelper=DatabaseHelper();
   List<Note> noteList;
 
   int count=0;
@@ -39,7 +30,7 @@ class NoteListState extends State<NoteList>{
       floatingActionButton: FloatingActionButton(
           onPressed: (){
             debugPrint('FAB clicked');
-            navigateToDetail('Add Note');
+            navigateToDetail(Note('','',2),'Add Note');
           },
           tooltip:'Add Note',
           child: Icon(Icons.add),
@@ -80,7 +71,7 @@ class NoteListState extends State<NoteList>{
 
               onTap: (){
                 debugPrint("_____");
-                navigateToDetail('Edit Note');
+                navigateToDetail(this.noteList[position],'Edit Note');
               },
             ),
           );
@@ -124,7 +115,7 @@ class NoteListState extends State<NoteList>{
     if(result!=0)
     {
       _showSnackBar(context,'Note Deleted Successfully');
-      //TODO update the list view
+      updateListView();
     }
   }
 
@@ -132,9 +123,37 @@ class NoteListState extends State<NoteList>{
     final snackBar=SnackBar(content:Text(message));
     Scaffold.of(context).showSnackBar(snackBar);
   }
-  void navigateToDetail(String title){
-    Navigator.push(context, MaterialPageRoute(builder:(context){
-      return NoteDetail(title);
+
+
+  void navigateToDetail(Note note,String title) async{
+    bool result = await Navigator.push(context, MaterialPageRoute(builder:(context){
+      return NoteDetail(note,title);
     }));
+
+    if(result==true){
+      updateListView();
+    }
+  }
+
+  void updateListView(){
+    final Future<Database> dbFuture=databaseHelper.initializeDatabase();
+    dbFuture.then((database){
+      Future<List<Note>> noteListFuture=databaseHelper.getNoteList();
+      noteListFuture.then((noteList){
+        setState((){
+          this.noteList=noteList;
+          this.count=noteList.length;
+        });
+      });
+    });
+  }
+}
+
+class NoteList extends StatefulWidget{
+
+  @override
+  State<StatefulWidget> createState(){
+
+    return NoteListState();
   }
 }
